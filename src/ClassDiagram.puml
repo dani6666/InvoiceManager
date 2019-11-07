@@ -1,0 +1,178 @@
+@startuml
+namespace main{
+class Main{
+main()
+}
+Main ..> RuntimeManager
+
+class RuntimeManager{
+    -IInputFetcher: inputFetcher
+    -ICommunicatesSender: communicatesSender
+    -IInvoiceDataManager: invoiceDataManager
+    -ICommandService: commandService
+    +void: runApp()
+}
+RuntimeManager..>IInputFetcher
+RuntimeManager..>ICommunicatesSender
+RuntimeManager..>IInvoiceDataManager
+RuntimeManager..>core.ICommandService
+
+class InvoiceDataManager implements IInvoiceDataManager{
+    -ICommunicatesSender: communicatesSender
+    -IInputFetcher: inputFetcher
+    +CreateInvoiceRequest: getInvoiceCreationRequest()
+    +int: getInvoiceShowRequest()
+    +void: getInvoiceShowRequest()
+    +void: showInvoices()
+}
+InvoiceDataManager..>ICommunicatesSender
+InvoiceDataManager..>IInputFetcher
+
+interface IInvoiceDataManager{
+    CreateInvoiceRequest: getInvoiceCreationRequest()
+    int: getInvoiceShowRequest()
+    void: getInvoiceShowRequest()
+    void: showInvoices()
+}
+
+class InputFetcher implements IInputFetcher{
+    -Scanner: inputScanner
+    +int: readInt()
+    +String: readString()
+    +float readFloat()
+}
+
+interface IInputFetcher{
+int: readInt()
+String: readString()
+float readFloat()
+}
+
+class CommunicatesSender implements ICommunicatesSender{
++void: showAvailbleActions()
++void: showInvalidInputError()
++void: creatingInvoiceCommunicate()
++void: insertClientNameCommunicate()
++void: insertClientSurnameCommunicate()
++void: insertProductsNumberCommunicate()
++void: insertProductNameCommunicate()
++void: insertProductCostCommunicate()
++void: searchingForInvoiceCommunicate()
++void: insertSearchedInvoiceIdCommunicate()
++void: displayInvoice()
+}
+
+interface ICommunicatesSender{
+void: showAvailbleActions()
+void: showInvalidInputError()
+void: creatingInvoiceCommunicate()
+void: insertClientNameCommunicate()
+void: insertClientSurnameCommunicate()
+void: insertProductsNumberCommunicate()
+void: insertProductNameCommunicate()
+void: insertProductCostCommunicate()
+void: searchingForInvoiceCommunicate()
+void: insertSearchedInvoiceIdCommunicate()
+void: displayInvoice()
+}
+}
+
+namespace core{
+class CommandService implements ICommandService{
+    -IInvoicesRepository: invoicesRepository
+    -IInvoiceMapper: invoiceMapper
+    +ArrayList<InvoiceView>: getInvoiceList() {
+    +void: addInvoice(CreateInvoiceRequest: request)
+    +InvoiceView: getInvoiceById(int: id)
+}
+
+CommandService..>infrastructure.IInvoicesRepository
+CommandService..>IInvoiceMapper
+
+interface ICommandService {
+    ArrayList<InvoiceView>: getInvoiceList()
+
+    void: addInvoice(CreateInvoiceRequest: request)
+
+    InvoiceView: getInvoiceById(int: id)
+}
+
+class InvoiceMapper implements IInvoiceMapper {
+    -IIdManager: idManager;
+
+    +InvoiceView: mapToInvoiceView(Invoice: invoice)
+
+    +ArrayList<InvoiceView>: mapToVectorInvoiceView(ArrayList<Invoice>: invoices)
+
+    +Invoice: mapToFullInvoice(CreateInvoiceRequest: invoiceRequest)
+}
+
+InvoiceMapper..>IIdManager
+
+interface IInvoiceMapper {
+    InvoiceView: mapToInvoiceView(Invoice: invoice);
+
+    ArrayList<InvoiceView>: mapToVectorInvoiceView(ArrayList<Invoice>: invoices);
+
+    Invoice: mapToFullInvoice(CreateInvoiceRequest: invoiceRequest);
+}
+
++class IdManager implements IIdManager {
+    -{static} int: currentId = 1;
+
+    +int: getNextId()
+}
+
+interface IIdManager {
+    int: getNextId();
+}
+
+class CreateInvoiceRequest {
+    +Client client;
+    +ArrayList<Product> products;
+}
+CreateInvoiceRequest "0..*" -- "1" Client
+CreateInvoiceRequest "0..*" -- "1..*" Product
+
+class Invoice {
+    +int id;
+    +Client client;
+    +String date;
+    +ArrayList<Product> products;
+    +float totalValue;
+}
+Invoice "0..*" -- "1" Client
+Invoice "0..*" -- "1..*" Product
+
+class InvoiceView {
+    +int id;
+    +Client client;
+    +String date;
+    +float totalValue;
+}
+InvoiceView "0..*" -- "1" Client
+
+class Client {
+    +String name;
+    +String surname;
+}
+
+class Product {
+    +String name;
+    +float cost;
+}
+}
+
+namespace infrastructure{
+class InvoicesRepository implements IInvoicesRepository{
+-{static}ArrayList<Invoice>: invoices
++ArrayList<Invoice>: getInvoices()
++void: addInvoice(Invoice: invoice)
+}
+
+interface IInvoicesRepository{
+ArrayList<Invoice>: getInvoices()
+void: addInvoice(Invoice: invoice)
+}
+}
+@enduml
